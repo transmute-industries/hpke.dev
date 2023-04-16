@@ -4,10 +4,9 @@ import * as jose from 'jose'
 import { Kem, Kdf, Aead, CipherSuite } from 'hpke-js'
 import { Flow } from './flow'
 
+// tag: TBD 1
 const alg = 'APPLE-HPKE-v1'
-
 const suites:any = {
-  // tag: TBD 1
   [alg]: new CipherSuite({
     kem: Kem.DhkemP256HkdfSha256,
     kdf: Kdf.HkdfSha256,
@@ -64,15 +63,14 @@ const encrypt = async (plaintext: Uint8Array, recipientPublicKeyJwk: any) => {
   return {
     ciphertext,
     enc,
-    // alg is not required.
-    // alg
+    // alg // is not required in envelop formats.
   }
 }
 
 const decrypt = async (jweLike:any, recipientPrivateKeyJwk: any) =>{
   const privateKeyJwk = JSON.parse(JSON.stringify(recipientPrivateKeyJwk))
   const {alg} = privateKeyJwk;
-  // alg is not required.
+  // alg is not required in envelop formats.
   // if (jweLike.alg !== alg){
   //   throw new Error("Unsuported alg")
   // }
