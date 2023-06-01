@@ -8,6 +8,7 @@ const alg = 'ECDH-ES+A128KW'
 const encrypt = async (plaintext: Uint8Array, recipientPublicKeyJwk: any) => {
   const publicKeyJwk = JSON.parse(JSON.stringify(recipientPublicKeyJwk))
   const { alg } = publicKeyJwk
+  publicKeyJwk.key_ops = [];
   const enc = alg.split('+').pop().replace('KW', 'GCM') // sure complain about this... I didn't invent JOSE.
   // sender is not 100% sure recipient will understand "enc" at this point.
   const jwe = await new jose.FlattenedEncrypt(plaintext)
@@ -18,6 +19,7 @@ const encrypt = async (plaintext: Uint8Array, recipientPublicKeyJwk: any) => {
 
 const decrypt = async (jwe: any, recipientPrivateKeyJwk: any) => {
   const privateKeyJwk = JSON.parse(JSON.stringify(recipientPrivateKeyJwk))
+
   // uncomment this to see what I mean about key restriction being useful.
   // before attempting stuff that is obviously not going to work...
   // recipientPrivateKeyJwk.alg = 'RSA-OAEP-256'
@@ -33,11 +35,16 @@ export const Old = ({ publicKeyJwk, privateKeyJwk, message }: any) => {
   const [jwe, setJwe] = useState<any>(null)
   useEffect(() => {
     ;(async () => {
-      const plaintext = new TextEncoder().encode(message)
-      const jwe = await encrypt(plaintext, { ...publicKeyJwk, alg })
-      const recoveredPlaintext = await decrypt(jwe, { ...privateKeyJwk, alg })
-      setJwe(jwe)
-      setRecoveredMessage(recoveredPlaintext)
+      try{
+        const plaintext = new TextEncoder().encode(message)
+        const jwe = await encrypt(plaintext, { ...publicKeyJwk, alg })
+        const recoveredPlaintext = await decrypt(jwe, { ...privateKeyJwk, alg })
+        setJwe(jwe)
+        setRecoveredMessage(recoveredPlaintext)
+      } catch(e){
+        console.error(e)
+      }
+      
     })()
   }, [publicKeyJwk, privateKeyJwk, message])
   return (

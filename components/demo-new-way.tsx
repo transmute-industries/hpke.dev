@@ -5,7 +5,7 @@ import { Kem, Kdf, Aead, CipherSuite } from 'hpke-js'
 import { Flow } from './flow'
 
 // tag: TBD 1
-const alg = 'APPLE-HPKE-v1'
+const alg = 'HPKEv1-Base-DHKEM(P256,HKDFSHA256)-HKDFSHA256'
 const suites:any = {
   [alg]: new CipherSuite({
     kem: Kem.DhkemP256HkdfSha256,
@@ -15,7 +15,7 @@ const suites:any = {
 }
 
 // const generate = async (alg: string) => {
-//   if (alg !== 'APPLE-HPKE-v1') {
+//   if (alg !== 'HPKEv1-Base-DHKEM(P256,HKDFSHA256)-HKDFSHA256') {
 //     throw new Error('Unsupported alg')
 //   }
 //   const { publicKey, privateKey } = await suites[alg].generateKeyPair()
@@ -60,11 +60,7 @@ const encrypt = async (plaintext: Uint8Array, recipientPublicKeyJwk: any) => {
   const ct = await sender.seal(plaintext);
   const enc = jose.base64url.encode(new Uint8Array(sender.enc)) ;
   const ciphertext = jose.base64url.encode(new Uint8Array(ct)) ;
-  return {
-    ciphertext,
-    enc,
-    // alg // is not required in envelop formats.
-  }
+  return ["A128GCM", enc, ciphertext]
 }
 
 const decrypt = async (jweLike:any, recipientPrivateKeyJwk: any) =>{
@@ -74,6 +70,8 @@ const decrypt = async (jweLike:any, recipientPrivateKeyJwk: any) =>{
   // if (jweLike.alg !== alg){
   //   throw new Error("Unsuported alg")
   // }
+  const [encAlg, enc, ciphertext] = jweLike;
+  // could vary suite by encAlg
   delete privateKeyJwk.alg;
   const privateKey = await window.crypto.subtle.importKey(
     "jwk",
@@ -85,12 +83,11 @@ const decrypt = async (jweLike:any, recipientPrivateKeyJwk: any) =>{
     true,
     ['deriveBits']
   );
-  const enc = jose.base64url.decode(jweLike.enc) ;
   const recipient = await suites[alg].createRecipientContext({
     recipientKey: privateKey, // rkp (CryptoKeyPair) is also acceptable.
-    enc: enc,
+    enc: jose.base64url.decode(enc),
   });
-  const ct = jose.base64url.decode(jweLike.ciphertext) ;
+  const ct = jose.base64url.decode(ciphertext) ;
   const pt = await recipient.open(ct);
   return new TextDecoder().decode(pt);
 }

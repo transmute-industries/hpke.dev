@@ -20,6 +20,8 @@ const generate = async () => {
       crv: publicKeyJwk.crv,
       x: publicKeyJwk.x,
       y: publicKeyJwk.y,
+      "use": "enc",
+      "key_ops": ["deriveBits"]
     },
     privateKeyJwk: {
       kty: privateKeyJwk.kty,
@@ -27,6 +29,7 @@ const generate = async () => {
       x: privateKeyJwk.x,
       y: privateKeyJwk.y,
       d: privateKeyJwk.d,
+      "key_ops": ["deriveBits"]
     },
   }
 }
