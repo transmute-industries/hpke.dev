@@ -1,8 +1,8 @@
 "use client";
 
-import { AppDrawer } from "../../components/AppDrawer";
+import { AppDrawer } from "./AppDrawer";
 
-import { Button, Box, Grid } from "@mui/material";
+import { Button, Box } from "@mui/material";
 
 import * as React from "react";
 import * as jose from "jose";
@@ -23,7 +23,7 @@ import { andromeda } from '@uiw/codemirror-theme-andromeda';
 import { EditorView } from "@uiw/react-codemirror"
 
 
-export default function Encrypt() {
+export function Encrypt() {
   const router = useRouter()
   const params = useParams<{ did: string }>() as any;
 

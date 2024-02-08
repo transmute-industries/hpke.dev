@@ -1,10 +1,9 @@
 "use client";
 
-import { AppDrawer } from "../../components/AppDrawer";
+import { AppDrawer } from "./AppDrawer";
 import { Box, Paper } from "@mui/material";
 import * as React from "react";
 import Typography from "@mui/material/Typography";
-import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { Chip } from "@mui/material";
 import LockPerson from "@mui/icons-material/LockPerson";
@@ -19,7 +18,7 @@ import { andromeda } from "@uiw/codemirror-theme-andromeda";
 
 import { EditorView } from "@uiw/react-codemirror";
 
-export default function Decrypt() {
+export function Decrypt() {
   const params = useParams<{ did: string }>() as any;
   const [message, setMessage] = React.useState() as any;
   const handleFilesAccepted = async (files: File[]) => {
