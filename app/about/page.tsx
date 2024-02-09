@@ -1,4 +1,4 @@
-import { AppDrawer } from "../components/AppDrawer";
+import AppBar from "../components/AppBar";
 
 import * as React from "react";
 import List from "@mui/material/List";
@@ -41,7 +41,7 @@ const resources = [
 
 export default function About() {
   return (
-    <AppDrawer>
+    <AppBar>
       <Typography sx={{ mb: 2 }} variant="h6" component="div">
         Resources
       </Typography>
@@ -70,6 +70,6 @@ export default function About() {
           );
         })}
       </List>
-    </AppDrawer>
+    </AppBar>
   );
 }

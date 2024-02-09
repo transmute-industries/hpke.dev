@@ -1,20 +1,28 @@
 
-import styles from "./page.module.css";
-import { AppDrawer } from "./components/AppDrawer";
+import { Link, Paper, Typography } from "@mui/material";
+import AppBar from "./components/AppBar";
 
-import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 
 import { KeyGen } from "./components/KeyGen";
 
 export default function Home() {
   return (
-   <AppDrawer>
-    <Grid2>
-      <Grid2>
-        <KeyGen/>
-      </Grid2>
-    </Grid2>
-   </AppDrawer>
+   <AppBar>
+     <KeyGen/>
+     <Paper sx={{p:4, mt: 2}}>
+      <Typography variant="h5" sx={{mb: 2}}>Comming soon...</Typography>
+      <Typography variant="body1"> 
+        <Link href="https://datatracker.ietf.org/doc/draft-ietf-cose-hpke/">
+          Integrated Encryption (Single Recipient) for COSE HPKE
+        </Link>
+      </Typography>
+      <Typography variant="body1"> 
+        <Link href="https://datatracker.ietf.org/doc/html/draft-rha-jose-hpke-encryptn">
+          Key Encryption (Multiple Recipients) for JOSE HPKE
+        </Link>
+      </Typography>
+     </Paper>
+   </AppBar>
   );
 }
 

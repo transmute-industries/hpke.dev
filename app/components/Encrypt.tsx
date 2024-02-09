@@ -1,6 +1,5 @@
 "use client";
 
-import { AppDrawer } from "./AppDrawer";
 
 import { Button, Box } from "@mui/material";
 
@@ -23,28 +22,25 @@ import { andromeda } from '@uiw/codemirror-theme-andromeda';
 import { EditorView } from "@uiw/react-codemirror"
 
 
-export function Encrypt() {
+export function Encrypt({publicKeyJwk}: {publicKeyJwk: any}) {
   const router = useRouter()
-  const params = useParams<{ did: string }>() as any;
-
-  const [message, setMessage] = React.useState('# ⌛ My lungs taste the air of Time Blown past falling sands ⌛')
-
+  const [message, setMessage] = React.useState(`
+# Markdown Message
+> ⌛ My lungs taste the air of Time Blown past falling sands ⌛
+  `.trim()+'\n')
   const encryptTo = async () => {
-    const publicKey = JSON.parse(new TextDecoder().decode(jose.base64url.decode(decodeURIComponent(params.did).replace("did:jwk:", ""))));
     const plaintext = new TextEncoder().encode(message)
-    const jwe = await compact.encrypt(plaintext, publicKey)
-    const did = `did:jwe:${jwe}`
-    router.push('/decrypt/' + did)
+    const jwe = await compact.encrypt(plaintext, publicKeyJwk)
+    router.push('/decrypt#jwe:' + jwe)
   };
   return (
-    <AppDrawer>
-      <Box sx={{ display: "flex", flexDirection: "row", mb: 2 }}>
+    <>
+    <Box sx={{ display: "flex", flexDirection: "row", mb: 2 }}>
         <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h6" component="div">
             Recipient
           </Typography>
         </Box>
-
         <Box>
           <Button
             variant="outlined"
@@ -56,13 +52,11 @@ export function Encrypt() {
           </Button>
         </Box>
       </Box>
-
       <Chip
         deleteIcon={<LockPerson />}
         onDelete={() => {}}
-        label={decodeURIComponent(params.did).substring(0, 32) + "..."}
+        label={publicKeyJwk.kid}
       />
-
       <Box sx={{mt: 2}}>
       <CodeMirror 
       theme={andromeda}
@@ -76,6 +70,7 @@ export function Encrypt() {
       ]} 
     />
       </Box>
-    </AppDrawer>
+    </>
+      
   );
 }

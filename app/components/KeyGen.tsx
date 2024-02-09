@@ -17,6 +17,8 @@ import { EditorView } from "@uiw/react-codemirror"
 
 import { useRouter } from "next/navigation";
 
+import pako from 'pako'
+
 const orderJwk = (jwk:any)=>{
  const {kid, alg, kty, crv, x, y, d} = jwk
  return JSON.parse(JSON.stringify({kid, alg, kty, crv, x, y, d}))
@@ -52,8 +54,9 @@ export const KeyGen = () =>{
   }
 
   const encryptTo = async ()=>{
-    const did = `did:jwk:${jose.base64url.encode(JSON.stringify(publicKey))}`
-    router.push('/encrypt/' + did)
+    const jwk = JSON.stringify(publicKey)
+    const compressed = pako.deflate(jwk)
+    router.push('/encrypt#pako:' + jose.base64url.encode(compressed))
   }
 
   useEffect(()=>{
@@ -73,6 +76,7 @@ export const KeyGen = () =>{
       </Box>
     </Box>
     <CodeMirror 
+   
       theme={andromeda}
       value={JSON.stringify(publicKey, null, 2)}  
       extensions={[
