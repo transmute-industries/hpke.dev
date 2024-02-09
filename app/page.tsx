@@ -17,7 +17,7 @@ export default function Home() {
         </Link>
       </Typography>
       <Typography variant="body1"> 
-        <Link href="https://datatracker.ietf.org/doc/html/draft-rha-jose-hpke-encryptn">
+        <Link href="https://datatracker.ietf.org/doc/html/draft-rha-jose-hpke-encrypt">
           Key Encryption (Multiple Recipients) for JOSE HPKE
         </Link>
       </Typography>
