@@ -56,7 +56,8 @@ export const KeyGen = () =>{
   const encryptTo = async ()=>{
     const jwk = JSON.stringify(publicKey)
     const compressed = pako.deflate(jwk)
-    router.push('/encrypt#pako:' + jose.base64url.encode(compressed))
+    const hash = '/encrypt#pako:' + jose.base64url.encode(compressed)
+    window.location.href = window.location.origin + hash
   }
 
   useEffect(()=>{
