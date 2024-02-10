@@ -31,7 +31,8 @@ export function Encrypt({publicKeyJwk}: {publicKeyJwk: any}) {
   const encryptTo = async () => {
     const plaintext = new TextEncoder().encode(message)
     const jwe = await compact.encrypt(plaintext, publicKeyJwk)
-    router.push('/decrypt#jwe:' + jwe)
+    const hash = '/decrypt#jwe:' + jwe
+    window.location.href = window.location.origin + hash
   };
   return (
     <>
