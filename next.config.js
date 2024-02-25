@@ -1,6 +1,8 @@
 const path = require("path");
 
 module.exports = {
+  distDir: 'dist',
+  output: 'export',
   webpack: (
     config,
     { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack }
