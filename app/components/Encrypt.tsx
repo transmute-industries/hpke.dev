@@ -22,17 +22,35 @@ import { andromeda } from '@uiw/codemirror-theme-andromeda';
 import { EditorView } from "@uiw/react-codemirror"
 
 
+import * as cose from '@transmute/cose'
+import pako from 'pako'
+
 export function Encrypt({publicKeyJwk}: {publicKeyJwk: any}) {
   const router = useRouter()
   const [message, setMessage] = React.useState(`
 # Markdown Message
 > ⌛ My lungs taste the air of Time Blown past falling sands ⌛
   `.trim()+'\n')
-  const encryptTo = async () => {
+  const encryptTo = async (type: 'jose'| 'cose') => {
     const plaintext = new TextEncoder().encode(message)
-    const jwe = await compact.encrypt(plaintext, publicKeyJwk)
-    const hash = '/decrypt#jwe:' + jwe
-    window.location.href = window.location.origin + hash
+    if (type === 'jose'){
+      const jwe = await compact.encrypt(plaintext, publicKeyJwk)
+      const hash = '/decrypt#jwe:' + jwe
+      window.location.href = window.location.origin + hash
+    } else if (type === 'cose'){
+      const ciphertext = await cose.encrypt.direct({
+        protectedHeader: cose.ProtectedHeader([
+          [cose.Protected.Alg, cose.Direct["HPKE-Base-P256-SHA256-AES128GCM"]],
+        ]),
+        plaintext,
+        recipients: {
+          keys: [publicKeyJwk]
+        },
+      });
+      const compressed = pako.deflate(ciphertext)
+      const hash = '/decrypt#cose-encrypt0:' + jose.base64url.encode(compressed)
+      window.location.href = window.location.origin + hash
+    }
   };
   return (
     <>
@@ -46,10 +64,23 @@ export function Encrypt({publicKeyJwk}: {publicKeyJwk: any}) {
           <Button
             variant="outlined"
             color="secondary"
-            onClick={encryptTo}
+            onClick={()=>{
+              encryptTo('jose')
+            }}
             endIcon={<LockPerson />}
           >
-            Encrypt
+            JOSE Encrypt
+          </Button>
+          <Button
+            sx={{ml: 2}}
+            variant="contained"
+            color="secondary"
+            onClick={()=>{
+              encryptTo('cose')
+            }}
+            endIcon={<LockPerson />}
+          >
+            COSE Encrypt
           </Button>
         </Box>
       </Box>

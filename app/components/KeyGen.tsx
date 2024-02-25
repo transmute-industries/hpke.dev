@@ -4,6 +4,10 @@ import { Button, Box, Grid } from "@mui/material"
 
 import CasinoIcon from '@mui/icons-material/Casino';
 import KeyIcon from '@mui/icons-material/Key';
+
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+
+import VisibilityOnIcon from '@mui/icons-material/Visibility';
 import LockPersonIcon from '@mui/icons-material/LockPerson';
 import { useEffect, useState } from "react";
 
@@ -16,6 +20,8 @@ import { andromeda } from '@uiw/codemirror-theme-andromeda';
 import { EditorView } from "@uiw/react-codemirror"
 
 import { useRouter } from "next/navigation";
+
+import { Dropzone } from "./Dropzone";
 
 import pako from 'pako'
 
@@ -34,6 +40,11 @@ function downloadObjectAsJson(exportObj:any, exportName:string){
   downloadAnchorNode.remove();
 }
 
+const getKeyName = (k:any)=>{
+  const type = k.d ? 'private': 'public'
+  return `${type}.${k.kid.split(':').pop().substring(0, 16)}`
+}
+
 export const KeyGen = () =>{
   const router = useRouter()
   const [privateKey, setPrivateKey] = useState<any>()
@@ -50,7 +61,12 @@ export const KeyGen = () =>{
   }
 
   const exportPrivateKey = async ()=>{
-    downloadObjectAsJson(privateKey, `${privateKey.kid.split(':').pop()}`)
+    downloadObjectAsJson(privateKey, getKeyName(privateKey))
+  }
+
+  const exportPublicKey = async ()=>{
+    const {d, ...publicKey} = privateKey
+    downloadObjectAsJson(publicKey, getKeyName(publicKey))
   }
 
   const encryptTo = async ()=>{
@@ -64,13 +80,22 @@ export const KeyGen = () =>{
     generateKey()
   }, [])
 
+  const handleFilesAccepted = async (files: File[])=>{
+   const [file] = files;
+    const jwk = await file.text()
+    const compressed = pako.deflate(jwk)
+    const hash = '/encrypt#pako:' + jose.base64url.encode(compressed)
+    window.location.href = window.location.origin + hash
+  }
+
   return <Box>
     <Box sx={{display: 'flex', flexDirection: 'row', mb: 2}}>
       <Box sx={{mr: 2}}>
         <Button onClick={generateKey} endIcon={<CasinoIcon/>}>Generate New Key</Button>
       </Box>
       <Box sx={{flexGrow: 1}}>
-        <Button onClick={exportPrivateKey} endIcon={<KeyIcon/>}>Export Private Key</Button>
+        <Button onClick={exportPrivateKey} endIcon={<VisibilityOffIcon/>}>Export Private Key</Button>
+        <Button onClick={exportPublicKey} endIcon={<VisibilityOnIcon/>}>Export Public Key</Button>
       </Box>
       <Box >
         <Button onClick={encryptTo} endIcon={<LockPersonIcon/>}>Encrypt To</Button>
@@ -85,5 +110,12 @@ export const KeyGen = () =>{
         EditorView.lineWrapping
       ]} 
     />
+    <Box sx={{mt: 2}}>
+      <Dropzone
+        dragText={"Drag exported public key here"}
+        dropText={"Drop encrypt to public key."}
+        onFilesAccepted={handleFilesAccepted}
+      />
+    </Box>
   </Box>
 }

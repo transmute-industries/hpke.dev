@@ -13,6 +13,11 @@ import DatasetLinkedIcon from "@mui/icons-material/DatasetLinked";
 
 const resources = [
   {
+    primary: "hpke.dev",
+    secondary: "HPKE Interoperability for JOSE and COSE ",
+    link: "https://github.com/transmute-industries/hpke.dev",
+  },
+  {
     primary: "Hybrid Public Key Encryption",
     secondary: "RFC 9180",
     link: "https://datatracker.ietf.org/doc/rfc9180/",

@@ -16,28 +16,64 @@ import { andromeda } from "@uiw/codemirror-theme-andromeda";
 
 import { EditorView } from "@uiw/react-codemirror";
 
-import Snackbar from '@mui/material/Snackbar';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
+import Snackbar from "@mui/material/Snackbar";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
 
-export function Decrypt({jwe}: {jwe: string}) {
-  const [snackMessage, setSnackMessage] = React.useState('')
+import { base64url } from "jose";
+import * as cose from "@transmute/cose";
+import pako from "pako";
+
+export function Decrypt({
+  jwe,
+  encodedCompressedCoseEncrypt0,
+}: {
+  jwe?: string;
+  encodedCompressedCoseEncrypt0?: string;
+}) {
+  let text = `${jwe ? jwe : encodedCompressedCoseEncrypt0}`;
+  const [snackMessage, setSnackMessage] = React.useState("");
   const [message, setMessage] = React.useState() as any;
   const handleFilesAccepted = async (files: File[]) => {
-    try{
-      const [file] = files;
-      const privateKeyText = await file.text();
-      const privateKey = JSON.parse(privateKeyText);
-      const plaintext = await compact.decrypt(jwe, privateKey);
-      setMessage(new TextDecoder().decode(plaintext));
-    } catch(e){
-      setSnackMessage('Decryption failed.')
-      setOpen(true);
+    if (jwe) {
+      try {
+        const [file] = files;
+        const privateKeyText = await file.text();
+        const privateKey = JSON.parse(privateKeyText);
+        const plaintext = await compact.decrypt(jwe, privateKey);
+        setMessage(new TextDecoder().decode(plaintext));
+      } catch (e) {
+        setSnackMessage("Decryption failed.");
+        setOpen(true);
+      }
+    }
+    if (encodedCompressedCoseEncrypt0) {
+      try {
+        const ciphertext = pako.inflate(
+          base64url.decode(encodedCompressedCoseEncrypt0)
+        );
+        const [file] = files;
+        const privateKeyText = await file.text();
+        const privateKey = JSON.parse(privateKeyText);
+        const plaintext = await cose.decrypt.direct({
+          ciphertext,
+          recipients: {
+            keys: [privateKey],
+          },
+        });
+        setMessage(new TextDecoder().decode(plaintext));
+      } catch (e) {
+        setSnackMessage("Decryption failed.");
+        setOpen(true);
+      }
     }
   };
   const [open, setOpen] = React.useState(false);
-  const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
+  const handleClose = (
+    event: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") {
       return;
     }
     setOpen(false);
@@ -70,11 +106,11 @@ export function Decrypt({jwe}: {jwe: string}) {
       <Chip
         deleteIcon={<LockPerson />}
         onDelete={() => {
-          navigator.clipboard.writeText(jwe);
-          setSnackMessage('Copied to clipboard.')
+          navigator.clipboard.writeText(text);
+          setSnackMessage("Copied to clipboard.");
           setOpen(true);
         }}
-        label={jwe.substring(0, 32) + "..."}
+        label={text.substring(0, 32) + "..."}
       />
       {message ? (
         <Box sx={{ mt: 2 }}>
@@ -93,7 +129,6 @@ export function Decrypt({jwe}: {jwe: string}) {
               />
             </Box>
           </Paper>
-          
         </Box>
       ) : (
         <Box sx={{ mt: 2 }}>
